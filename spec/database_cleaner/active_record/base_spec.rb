@@ -28,6 +28,18 @@ module DatabaseCleaner
       let :config_location do
         '/path/to/config/database.yml'
       end
+      
+      describe "initialize" do
+        it "takes an optional hash" do
+          lambda {
+            ExampleStrategy.new({:candy => "good"})  
+          }.should_not raise_error
+        end
+        
+        it "sets the connection to the provided connection_override" do
+          ExampleStrategy.new({:connection_override => :connection}).connection.should == :connection
+        end
+      end
 
       before { ::DatabaseCleaner::ActiveRecord.stub(:config_file_location).and_return(config_location) }
 
@@ -52,7 +64,24 @@ module DatabaseCleaner
           subject.db = :my_db
         end
       end
+      
+      describe "connection" do
+        it { should respond_to(:connection=) }
 
+        it "should store the assigned connection" do
+
+          subject.connection = :my_connection
+          subject.connection.should == :my_connection
+        end
+
+        it "should default to :default" do
+          mock_connection = mock("connetion", :connection => :a_connection)
+          subject.should_receive(:connection_klass).and_return(mock_connection)
+          subject.connection.should == :a_connection
+        end
+
+      end
+      
       describe "load_config" do
 
         it { should respond_to(:load_config) }

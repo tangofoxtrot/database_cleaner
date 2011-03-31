@@ -21,7 +21,19 @@ module DatabaseCleaner
       include ::DatabaseCleaner::Generic::Base
 
       attr_accessor :connection_hash
-
+      
+      def initialize(options={})
+        @connection = options[:connection_override]
+      end
+      
+      def connection
+        @connection ||= connection_klass.connection
+      end
+      
+      def connection=(new_connection)
+        @connection = new_connection
+      end
+      
       def db=(desired_db)
         @db = desired_db
         load_config

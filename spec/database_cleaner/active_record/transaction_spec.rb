@@ -7,8 +7,9 @@ module DatabaseCleaner
 
     describe Transaction do
       let (:connection) { mock("connection") }
+      let (:transaction) { Transaction.new }
       before(:each) do
-        ::ActiveRecord::Base.stub!(:connection).and_return(connection)
+        transaction.stub!(:connection).and_return(connection)
       end
 
       describe "#start" do
@@ -17,7 +18,7 @@ module DatabaseCleaner
           connection.stub!(:begin_db_transaction)
 
           connection.should_receive(:increment_open_transactions)
-          Transaction.new.start
+          transaction.start
         end
 
         it "should tell ActiveRecord to increment connection if its not possible to increment current connection" do
@@ -25,14 +26,14 @@ module DatabaseCleaner
           connection.stub!(:begin_db_transaction)
 
           ::ActiveRecord::Base.should_receive(:increment_open_transactions)
-          Transaction.new.start
+          transaction.start
         end
 
         it "should start a transaction" do
             connection.stub!(:increment_open_transactions)
 
             connection.should_receive(:begin_db_transaction)
-            Transaction.new.start
+            transaction.start
         end
       end
 
@@ -41,14 +42,14 @@ module DatabaseCleaner
             connection.stub!(:decrement_open_transactions)
 
             connection.should_receive(:rollback_db_transaction)
-            Transaction.new.clean
+            transaction.clean
         end
         it "should decrement open transactions if possible" do
           connection.stub!(:respond_to?).with(:decrement_open_transactions).and_return(true)
           connection.stub!(:rollback_db_transaction)
 
           connection.should_receive(:decrement_open_transactions)
-          Transaction.new.clean
+          transaction.clean
         end
 
         it "should decrement connection via ActiveRecord::Base if connection won't" do
@@ -56,7 +57,7 @@ module DatabaseCleaner
           connection.stub!(:rollback_db_transaction)
 
           ::ActiveRecord::Base.should_receive(:decrement_open_transactions)
-          Transaction.new.clean
+          transaction.clean
         end
       end
     end
